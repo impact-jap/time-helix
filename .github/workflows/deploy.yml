@@ -2,8 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -11,14 +10,9 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: github-pages
-  cancel-in-progress: true
-
 jobs:
-  build:
+  build_site:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,20 +28,19 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Upload GitHub Pages artifact
+      - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          # Vite usually outputs to 'dist'
+          path: './dist'
 
   deploy:
-    needs: build
+    needs: build_site
     runs-on: ubuntu-latest
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
